@@ -1,0 +1,126 @@
+grammar org.xtext.example.mydsl.MyDsl with org.eclipse.xtext.common.Terminals
+
+generate myDsl "http://www.xtext.org/example/mydsl/MyDsl"
+
+Model:
+	(model += Definition)*;
+	
+
+//定义了function、topic、activity、event以及swimlane
+Definition:
+	functions+=FunctionDefinition | topics+=TopicDefinition | activities+=ActivityDefinition | events+=EventDefinition | swimlanes +=SwimLaneDefinition | includes += ImportDefinition
+;
+
+ImportDefinition:
+	'import' importURI = STRING ';'
+;
+
+//定义了函数以及函数的返回类型
+FunctionDefinition :
+	'function' returnType = Type name=ID ('('(types += Type args+=ID (','types += Type args+=ID)*)? ')')+ 'on' service = Service ';'
+;
+
+Type:
+	'Number' | 'String' | 'Boolean'
+;
+
+Service:
+	servicename = ID (':'(number = NUMBER))? ('/'args+=ID)*
+;
+
+
+TopicDefinition:
+	'topic' name=ID topic = TopicName';'
+;
+
+TopicName:
+	topic+=ID (topic+=':' topic+=ID)
+;
+
+ActivityDefinition:
+	'activity' name = ID '{'
+		(rule += RuleDefinition)*
+	 '}'
+;
+
+
+EventDefinition:
+	'event' name = ID '{'
+		(rule += RuleDefinition)*
+	'}'
+;
+
+
+SwimLaneDefinition:
+	'swimlane' name = ID '{'
+		(rule += RuleDefinition)*
+	'}'
+;
+
+RuleDefinition:
+	'rule' name = ID point = Pointcut '{'
+		(var += VarDefinition | ifttt += IFTTT | varrecall += VarRecall)*
+	 '}'
+;
+
+VarDefinition:
+	type = Type name = ID '=' rightvalue = ValueCompute ';'
+;
+
+//定义了IFTTT规则
+IFTTT:
+	'if' judge += JudgeDefinition 'then' 'throws' topic = [TopicDefinition]';'
+;
+
+JudgeDefinition:
+	judge += Judge (conjunction += CONJUNCTIONEXPR judge += Judge)*
+;
+
+Judge:
+	leftvalue = ValueCompute expression = COMPARASIONEXPR rightValue = ValueCompute
+;
+
+Value:
+	rightvalue1 = NUMBER | rightvalue2 = STRING | rightvalue3 = FunctionRecall | rightvalue4 = [VarDefinition]
+;
+
+VarRecall:
+	varname = [VarDefinition] '=' value = ValueCompute ';'
+;
+
+FunctionRecall:
+	refName=[FunctionDefinition]'(' ( args+=Expression (',' args+=Expression)* )? ')'
+;
+
+Expression:
+	string += STRING | number += NUMBER
+;
+
+terminal NUMBER:
+	INT( '.' INT)?
+;
+
+//表达式计算+-*/
+ValueCompute:
+	value += Value(compute += COMPUTE value+= Value)*
+;
+
+
+terminal COMPUTE:
+	'+' | '-' | '*' | '/'
+;
+
+terminal COMPARASIONEXPR:
+	"==" | "!=" | "<" | "<=" | ">" | ">="
+;
+
+
+terminal CONJUNCTIONEXPR:
+	'and' | 'or'
+;
+
+Pointcut:
+	'before' | 'after'
+;
+
+

@@ -1,0 +1,4 @@
+/* These are functions you can invoke*/
+function Number valueExchange(String args) on localhost:8080/value;
+function Number findTemperature(String args) on localhost:8080/value;
+function String findLocation(String args,Number args1) on localhost:8080/value;

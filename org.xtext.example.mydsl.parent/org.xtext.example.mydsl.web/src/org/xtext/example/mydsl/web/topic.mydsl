@@ -1,0 +1,4 @@
+/* These are topic you can throw */
+topic topic1 topic1:topic2;
+topic topic2 topic1:topic2;
+topic topic3 topic1:topic2;
